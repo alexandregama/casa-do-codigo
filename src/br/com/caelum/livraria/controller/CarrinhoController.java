@@ -14,7 +14,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import br.com.caelum.livraria.modelo.Carrinho;
 import br.com.caelum.livraria.modelo.Formato;
 import br.com.caelum.livraria.modelo.Livro;
-import br.com.caelum.livraria.modelo.Pagamento;
 import br.com.caelum.livraria.modelo.Pedido;
 
 @Controller
@@ -29,25 +28,23 @@ public class CarrinhoController{
 	private static final String REDIRECT_CARRINHO_CONFIRMAR = "redirect:/carrinho/confirmarPagamento";
 
 	@Autowired
-	Carrinho carrinho;
+	private Carrinho carrinho;
 	
 	@PersistenceContext
-	EntityManager manager;
+	private EntityManager manager;
 	
 	@RequestMapping("/adicionarItem")
-	public String adicionarItemNoCarrinho(@RequestParam("id") Integer idLivro, 
-											@RequestParam("formatoLivro") Formato formato)  {
-		
+	public String adicionarItemNoCarrinho(@RequestParam("id") Integer idLivro, @RequestParam("formatoLivro") Formato formato)  {
 		Livro livro = manager.find(Livro.class, idLivro);
+		
 		carrinho.adicionarOuIncremantarQuantidadeDoItem(livro, formato);
 
 		return REDIRECT_CARRINHO_LISTAR;
 	}
 
 	@RequestMapping("/removerItem")
-	public String removerItemNoCarrinho(@RequestParam("codigo") String codigo, 
-											@RequestParam("formato") Formato formato, 
-													RedirectAttributes modelo) {
+	public String removerItemNoCarrinho(@RequestParam("codigo") String codigo, @RequestParam("formato") Formato formato, 
+											RedirectAttributes modelo) {
 		
 		this.carrinho.removerItemPeloCodigoEFormato(codigo, formato);
 		
@@ -66,9 +63,8 @@ public class CarrinhoController{
 	
 	
 	@RequestMapping("/criarPagamento")
-	public String criarPagamento(@RequestParam("numeroCartao") String numeroCartao, 
-									@RequestParam("titularCartao") String titularCartao, 
-										RedirectAttributes modelo) {
+	public String criarPagamento(@RequestParam("numeroCartao") String numeroCartao, @RequestParam("titularCartao") String titularCartao, 
+									RedirectAttributes modelo) {
 	
 		if(ehStringVazia(numeroCartao) || ehStringVazia(titularCartao)) {
 			modelo.addFlashAttribute("messageWarn", "Por favor preenche os dados do cartão!");
@@ -89,11 +85,6 @@ public class CarrinhoController{
 	@RequestMapping("/confirmarPagamento")
 	public String confirmarPagamento() {
 		return JSP_CARRINHO_CONFIRMAR;
-	}
-
-
-	private boolean ehStringVazia(String string) {
-		return string == null || string.trim().isEmpty();
 	}
 
 	@RequestMapping("/finalizar")
@@ -124,6 +115,10 @@ public class CarrinhoController{
 		//verificacao do estoque aqui
 		
 		return JSP_CARRINHO_LISTAR;
+	}
+	
+	private boolean ehStringVazia(String string) {
+		return string == null || string.trim().isEmpty();
 	}
 	
 }
