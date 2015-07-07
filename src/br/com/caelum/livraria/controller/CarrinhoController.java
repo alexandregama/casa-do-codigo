@@ -22,12 +22,6 @@ import com.google.common.base.Optional;
 @Scope("request")
 public class CarrinhoController {
 	
-	private static final String JSP_CARRINHO_CONFIRMAR = "carrinho/confirmarPagamento";
-	private static final String JSP_CARRINHO_LISTAR = "carrinho/listar";
-
-	private static final String REDIRECT_CARRINHO_LISTAR = "redirect:/carrinho/listar";
-	private static final String REDIRECT_CARRINHO_CONFIRMAR = "redirect:/carrinho/confirmarPagamento";
-
 	private Carrinho carrinho;
 	
 	private Livros livros;
@@ -53,7 +47,7 @@ public class CarrinhoController {
 			carrinho.adicionarOuIncremantarQuantidadeDoItem(livro.get(), formato);
 		}
 
-		return REDIRECT_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 	}
 
 	@RequestMapping("/removerItem")
@@ -64,7 +58,7 @@ public class CarrinhoController {
 		
 		modelo.addFlashAttribute("messageInfo", "O item foi removido com sucesso.");
 		
-		return REDIRECT_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 	}
 	
 	@RequestMapping("/calcularCep")
@@ -72,7 +66,7 @@ public class CarrinhoController {
 		
 		this.carrinho.atualizarFrete(novoCepDestino);
 
-		return REDIRECT_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 	}
 	
 	
@@ -82,7 +76,7 @@ public class CarrinhoController {
 	
 		if(ehStringVazia(numeroCartao) || ehStringVazia(titularCartao)) {
 			modelo.addFlashAttribute("messageWarn", "Por favor preenche os dados do cartão!");
-			return REDIRECT_CARRINHO_LISTAR;
+			return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 		}
 
 		this.carrinho.criarPagamento(numeroCartao, titularCartao);
@@ -93,12 +87,12 @@ public class CarrinhoController {
 			modelo.addFlashAttribute("messageWarn", "Pagamento não foi criado!");
 		}
 		
-		return REDIRECT_CARRINHO_CONFIRMAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_CONFIRMAR;
 	}
 	
 	@RequestMapping("/confirmarPagamento")
 	public String confirmarPagamento() {
-		return JSP_CARRINHO_CONFIRMAR;
+		return CarrinhoRedirectUrl.JSP_CARRINHO_CONFIRMAR;
 	}
 
 	@RequestMapping("/finalizar")
@@ -107,12 +101,12 @@ public class CarrinhoController {
 		
 		if(!carrinho.isFreteCalculado()) {
 			modelo.addFlashAttribute("messageWarn", "O Frete deve ser calculado.");
-			return REDIRECT_CARRINHO_LISTAR;
+			return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 		}
 		
 		if(!carrinho.isPagamentoCriado()) {
 			modelo.addFlashAttribute("messageWarn", "O pagamento deve ser aprovado antes.");
-			return REDIRECT_CARRINHO_LISTAR;
+			return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 		}
 
 		Pedido pedido = this.carrinho.finalizarPedido();
@@ -120,7 +114,7 @@ public class CarrinhoController {
 
 		modelo.addFlashAttribute("messageInfo", "Pedido realizado. STATUS: " + pedido.getStatus());
 
-		return REDIRECT_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 	}
 	
 	@RequestMapping("/listar")
@@ -128,7 +122,7 @@ public class CarrinhoController {
 		
 		//verificacao do estoque aqui
 		
-		return JSP_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.JSP_CARRINHO_LISTAR;
 	}
 	
 	private boolean ehStringVazia(String string) {

@@ -1,5 +1,6 @@
 package br.com.caelum.correios.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,10 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import br.com.caelum.livraria.controller.CarrinhoController;
+import br.com.caelum.livraria.controller.CarrinhoRedirectUrl;
 import br.com.caelum.livraria.dao.Livros;
 import br.com.caelum.livraria.dao.Pedidos;
 import br.com.caelum.livraria.modelo.Carrinho;
@@ -62,6 +63,18 @@ public class CarrinhoControllerTest {
 		controller.adicionarItemNoCarrinho(1, Formato.IMPRESSO);
 		
 		verify(carrinho, never()).adicionarOuIncremantarQuantidadeDoItem(livroQualquer, Formato.IMPRESSO);
+	}
+	
+	@Test
+	public void deveriaRedirecionarparaAListagemDoCarrinhoQuandoUmLivroEhAdicionado() throws Exception {
+		Livro livro = new LivroBuilder().build();
+		Optional<Livro> livroOptional = Optional.of(livro);
+		
+		when(livros.buscaPor(1)).thenReturn(livroOptional);
+		
+		String urlDeRedirecionamento = controller.adicionarItemNoCarrinho(1, Formato.IMPRESSO);
+		
+		assertEquals(CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR, urlDeRedirecionamento);
 	}
 	
 }
