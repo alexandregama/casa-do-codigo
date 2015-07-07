@@ -1,5 +1,6 @@
 package br.com.caelum.correios.controller;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +33,8 @@ public class CarrinhoControllerTest {
 	private Pedidos pedidos;
 
 	private CarrinhoController controller;
+	
+	private Livro livroQualquer = new LivroBuilder().build();
 
 	@Before
 	public void setUp() {
@@ -39,7 +42,7 @@ public class CarrinhoControllerTest {
 	}
 	
 	@Test
-	public void devriaAdicionarUmLivroNoCarrinhoQuandoOLivroExiste() throws Exception {
+	public void deveriaAdicionarUmLivroNoCarrinhoQuandoOLivroExiste() throws Exception {
 		Livro livro = new LivroBuilder().build();
 		Optional<Livro> livroOptional = Optional.of(livro);
 		
@@ -48,6 +51,17 @@ public class CarrinhoControllerTest {
 		controller.adicionarItemNoCarrinho(1, Formato.IMPRESSO);
 		
 		verify(carrinho).adicionarOuIncremantarQuantidadeDoItem(livro, Formato.IMPRESSO);
+	}
+	
+	@Test
+	public void naoDeveriaAdicionarUmLivroNoCarrinhoQuandoOLivroNaoExiste() throws Exception {
+		Optional<Livro> livroInexistente = Optional.absent();
+		
+		when(livros.buscaPor(1)).thenReturn(livroInexistente);
+		
+		controller.adicionarItemNoCarrinho(1, Formato.IMPRESSO);
+		
+		verify(carrinho, never()).adicionarOuIncremantarQuantidadeDoItem(livroQualquer, Formato.IMPRESSO);
 	}
 	
 }
