@@ -20,7 +20,7 @@ import com.google.common.base.Optional;
 @Controller
 @RequestMapping("/carrinho")
 @Scope("request")
-public class CarrinhoController{
+public class CarrinhoController {
 	
 	private static final String JSP_CARRINHO_CONFIRMAR = "carrinho/confirmarPagamento";
 	private static final String JSP_CARRINHO_LISTAR = "carrinho/listar";
