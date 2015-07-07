@@ -33,6 +33,15 @@ public class CarrinhoController{
 	@PersistenceContext
 	private EntityManager manager;
 	
+	public CarrinhoController(Carrinho carrinho, EntityManager entityManager) {
+		this.carrinho = carrinho;
+		this.manager = entityManager;
+	}
+	
+	@Deprecated //Spring eyes only
+	CarrinhoController() {
+	}
+	
 	@RequestMapping("/adicionarItem")
 	public String adicionarItemNoCarrinho(@RequestParam("id") Integer idLivro, @RequestParam("formatoLivro") Formato formato)  {
 		Livro livro = manager.find(Livro.class, idLivro);
