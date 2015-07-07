@@ -1,8 +1,5 @@
 package br.com.caelum.livraria.controller;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -11,10 +8,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import br.com.caelum.livraria.dao.Livros;
+import br.com.caelum.livraria.dao.Pedidos;
 import br.com.caelum.livraria.modelo.Carrinho;
 import br.com.caelum.livraria.modelo.Formato;
 import br.com.caelum.livraria.modelo.Livro;
 import br.com.caelum.livraria.modelo.Pedido;
+
+import com.google.common.base.Optional;
 
 @Controller
 @RequestMapping("/carrinho")
@@ -27,15 +28,17 @@ public class CarrinhoController{
 	private static final String REDIRECT_CARRINHO_LISTAR = "redirect:/carrinho/listar";
 	private static final String REDIRECT_CARRINHO_CONFIRMAR = "redirect:/carrinho/confirmarPagamento";
 
-	@Autowired
 	private Carrinho carrinho;
 	
-	@PersistenceContext
-	private EntityManager manager;
+	private Livros livros;
 	
-	public CarrinhoController(Carrinho carrinho, EntityManager entityManager) {
+	private Pedidos pedidos;
+	
+	@Autowired
+	public CarrinhoController(Carrinho carrinho, Livros livros, Pedidos pedidos) {
 		this.carrinho = carrinho;
-		this.manager = entityManager;
+		this.livros = livros;
+		this.pedidos = pedidos;
 	}
 	
 	@Deprecated //Spring eyes only
@@ -44,9 +47,11 @@ public class CarrinhoController{
 	
 	@RequestMapping("/adicionarItem")
 	public String adicionarItemNoCarrinho(@RequestParam("id") Integer idLivro, @RequestParam("formatoLivro") Formato formato)  {
-		Livro livro = manager.find(Livro.class, idLivro);
+		Optional<Livro> livro = livros.buscaPor(idLivro);
 		
-		carrinho.adicionarOuIncremantarQuantidadeDoItem(livro, formato);
+		if (livro.isPresent()) {
+			carrinho.adicionarOuIncremantarQuantidadeDoItem(livro.get(), formato);
+		}
 
 		return REDIRECT_CARRINHO_LISTAR;
 	}
@@ -111,7 +116,7 @@ public class CarrinhoController{
 		}
 
 		Pedido pedido = this.carrinho.finalizarPedido();
-		this.manager.persist(pedido);
+		pedidos.salva(pedido);
 
 		modelo.addFlashAttribute("messageInfo", "Pedido realizado. STATUS: " + pedido.getStatus());
 

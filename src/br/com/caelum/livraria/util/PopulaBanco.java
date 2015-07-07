@@ -37,7 +37,7 @@ public class PopulaBanco {
         tmpl.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
-            	PopulaBanco.this.roda();
+//            	PopulaBanco.this.roda();
             }
         });
    }
