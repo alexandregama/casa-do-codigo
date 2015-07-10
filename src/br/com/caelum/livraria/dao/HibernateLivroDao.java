@@ -10,7 +10,7 @@ import com.google.common.base.Optional;
 import br.com.caelum.livraria.modelo.Livro;
 
 @Component
-public class HibernateLivroDao implements Livros {
+class HibernateLivroDao implements Livros {
 
 	@PersistenceContext
 	private EntityManager manager;
