@@ -54,7 +54,7 @@ public class CarrinhoController {
 	public String removerItemNoCarrinho(@RequestParam("codigo") String codigo, @RequestParam("formato") Formato formato, 
 											RedirectAttributes modelo) {
 		
-		this.carrinho.removerItemPeloCodigoEFormato(codigo, formato);
+		carrinho.removerItemPeloCodigoEFormato(codigo, formato);
 		
 		modelo.addFlashAttribute("messageInfo", "O item foi removido com sucesso.");
 		

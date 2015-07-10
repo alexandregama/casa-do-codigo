@@ -1,6 +1,6 @@
 package br.com.caelum.correios.controller;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.caelum.livraria.controller.CarrinhoController;
 import br.com.caelum.livraria.controller.CarrinhoRedirectUrl;
@@ -36,6 +37,9 @@ public class CarrinhoControllerTest {
 	private CarrinhoController controller;
 	
 	private Livro livroQualquer = new LivroBuilder().build();
+	
+	@Mock
+	private RedirectAttributes redirect;
 
 	@Before
 	public void setUp() {
@@ -75,6 +79,27 @@ public class CarrinhoControllerTest {
 		String urlDeRedirecionamento = controller.adicionarItemNoCarrinho(1, Formato.IMPRESSO);
 		
 		assertEquals(CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR, urlDeRedirecionamento);
+	}
+	
+	@Test
+	public void deveriaRemoverItemDoCarrinho() throws Exception {
+		controller.removerItemNoCarrinho("1234", Formato.EBOOK, redirect);
+		
+		verify(carrinho).removerItemPeloCodigoEFormato("1234", Formato.EBOOK);
+	}
+	
+	@Test
+	public void deveriaAdicionarMensagemDeRemocaoComSucessoAoRemoverUmItemDoCarrinho() throws Exception {
+		controller.removerItemNoCarrinho("1234", Formato.EBOOK, redirect);
+		
+		verify(redirect).addFlashAttribute("messageInfo", "O item foi removido com sucesso.");
+	}
+	
+	@Test
+	public void deveriaRedirecionarParaAListagemDoCarrinhoAoRemoverUmItemDoCarrinho() throws Exception {
+		String redirectUrl = controller.removerItemNoCarrinho("1234", Formato.EBOOK, redirect);
+		
+		assertEquals("redirect:/carrinho/listar", redirectUrl);
 	}
 	
 }
