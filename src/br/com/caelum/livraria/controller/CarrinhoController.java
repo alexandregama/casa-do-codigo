@@ -1,8 +1,5 @@
 package br.com.caelum.livraria.controller;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -11,49 +8,57 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import br.com.caelum.livraria.dao.Livros;
+import br.com.caelum.livraria.dao.Pedidos;
 import br.com.caelum.livraria.modelo.Carrinho;
 import br.com.caelum.livraria.modelo.Formato;
 import br.com.caelum.livraria.modelo.Livro;
-import br.com.caelum.livraria.modelo.Pagamento;
 import br.com.caelum.livraria.modelo.Pedido;
+
+import com.google.common.base.Optional;
 
 @Controller
 @RequestMapping("/carrinho")
 @Scope("request")
-public class CarrinhoController{
+public class CarrinhoController {
 	
-	private static final String JSP_CARRINHO_CONFIRMAR = "carrinho/confirmarPagamento";
-	private static final String JSP_CARRINHO_LISTAR = "carrinho/listar";
-
-	private static final String REDIRECT_CARRINHO_LISTAR = "redirect:/carrinho/listar";
-	private static final String REDIRECT_CARRINHO_CONFIRMAR = "redirect:/carrinho/confirmarPagamento";
-
+	private Carrinho carrinho;
+	
+	private Livros livros;
+	
+	private Pedidos pedidos;
+	
 	@Autowired
-	Carrinho carrinho;
+	public CarrinhoController(Carrinho carrinho, Livros livros, Pedidos pedidos) {
+		this.carrinho = carrinho;
+		this.livros = livros;
+		this.pedidos = pedidos;
+	}
 	
-	@PersistenceContext
-	EntityManager manager;
+	@Deprecated //Spring eyes only
+	CarrinhoController() {
+	}
 	
 	@RequestMapping("/adicionarItem")
-	public String adicionarItemNoCarrinho(@RequestParam("id") Integer idLivro, 
-											@RequestParam("formatoLivro") Formato formato)  {
+	public String adicionarItemNoCarrinho(@RequestParam("id") Integer idLivro, @RequestParam("formatoLivro") Formato formato)  {
+		Optional<Livro> livro = livros.buscaPor(idLivro);
 		
-		Livro livro = manager.find(Livro.class, idLivro);
-		carrinho.adicionarOuIncremantarQuantidadeDoItem(livro, formato);
+		if (livro.isPresent()) {
+			carrinho.adicionarOuIncremantarQuantidadeDoItem(livro.get(), formato);
+		}
 
-		return REDIRECT_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 	}
 
 	@RequestMapping("/removerItem")
-	public String removerItemNoCarrinho(@RequestParam("codigo") String codigo, 
-											@RequestParam("formato") Formato formato, 
-													RedirectAttributes modelo) {
+	public String removerItemNoCarrinho(@RequestParam("codigo") String codigo, @RequestParam("formato") Formato formato, 
+											RedirectAttributes modelo) {
 		
-		this.carrinho.removerItemPeloCodigoEFormato(codigo, formato);
+		carrinho.removerItemPeloCodigoEFormato(codigo, formato);
 		
 		modelo.addFlashAttribute("messageInfo", "O item foi removido com sucesso.");
 		
-		return REDIRECT_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 	}
 	
 	@RequestMapping("/calcularCep")
@@ -61,18 +66,17 @@ public class CarrinhoController{
 		
 		this.carrinho.atualizarFrete(novoCepDestino);
 
-		return REDIRECT_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 	}
 	
 	
 	@RequestMapping("/criarPagamento")
-	public String criarPagamento(@RequestParam("numeroCartao") String numeroCartao, 
-									@RequestParam("titularCartao") String titularCartao, 
-										RedirectAttributes modelo) {
+	public String criarPagamento(@RequestParam("numeroCartao") String numeroCartao, @RequestParam("titularCartao") String titularCartao, 
+									RedirectAttributes modelo) {
 	
 		if(ehStringVazia(numeroCartao) || ehStringVazia(titularCartao)) {
 			modelo.addFlashAttribute("messageWarn", "Por favor preenche os dados do cartão!");
-			return REDIRECT_CARRINHO_LISTAR;
+			return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 		}
 
 		this.carrinho.criarPagamento(numeroCartao, titularCartao);
@@ -83,17 +87,12 @@ public class CarrinhoController{
 			modelo.addFlashAttribute("messageWarn", "Pagamento não foi criado!");
 		}
 		
-		return REDIRECT_CARRINHO_CONFIRMAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_CONFIRMAR;
 	}
 	
 	@RequestMapping("/confirmarPagamento")
 	public String confirmarPagamento() {
-		return JSP_CARRINHO_CONFIRMAR;
-	}
-
-
-	private boolean ehStringVazia(String string) {
-		return string == null || string.trim().isEmpty();
+		return CarrinhoRedirectUrl.JSP_CARRINHO_CONFIRMAR;
 	}
 
 	@RequestMapping("/finalizar")
@@ -102,20 +101,20 @@ public class CarrinhoController{
 		
 		if(!carrinho.isFreteCalculado()) {
 			modelo.addFlashAttribute("messageWarn", "O Frete deve ser calculado.");
-			return REDIRECT_CARRINHO_LISTAR;
+			return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 		}
 		
 		if(!carrinho.isPagamentoCriado()) {
 			modelo.addFlashAttribute("messageWarn", "O pagamento deve ser aprovado antes.");
-			return REDIRECT_CARRINHO_LISTAR;
+			return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 		}
 
 		Pedido pedido = this.carrinho.finalizarPedido();
-		this.manager.persist(pedido);
+		pedidos.salva(pedido);
 
 		modelo.addFlashAttribute("messageInfo", "Pedido realizado. STATUS: " + pedido.getStatus());
 
-		return REDIRECT_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.REDIRECT_CARRINHO_LISTAR;
 	}
 	
 	@RequestMapping("/listar")
@@ -123,7 +122,11 @@ public class CarrinhoController{
 		
 		//verificacao do estoque aqui
 		
-		return JSP_CARRINHO_LISTAR;
+		return CarrinhoRedirectUrl.JSP_CARRINHO_LISTAR;
+	}
+	
+	private boolean ehStringVazia(String string) {
+		return string == null || string.trim().isEmpty();
 	}
 	
 }
