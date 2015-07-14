@@ -5,6 +5,6 @@ import java.rmi.RemoteException;
 
 public interface EstoqueRmi extends Remote {
 
-	public ItemEstoque getItemEstoque(String codigo) throws RemoteException;
+	ItemEstoque getItemEstoque(String codigo) throws RemoteException;
 	
 }
