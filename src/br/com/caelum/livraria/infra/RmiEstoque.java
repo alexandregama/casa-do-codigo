@@ -6,7 +6,7 @@ import br.com.caelum.livraria.modelo.Estoque;
 import br.com.caelum.livraria.modelo.ItemEstoque;
 import br.com.casadocodigo.rmi.EstoqueRmi;
 
-class RmiEstoque implements Estoque {
+public class RmiEstoque implements Estoque {
 
 	private EstoqueRmi estoqueRmi;
 
