@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import br.com.caelum.livraria.infra.EstoqueService;
 import br.com.caelum.livraria.jms.EnviadorMensagemJms;
 import br.com.caelum.livraria.rest.ClienteRest;
 
@@ -22,16 +23,18 @@ public class Carrinho implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Set<ItemCompra> itensDeCompra = new LinkedHashSet<>();
+	
 	private BigDecimal valorFrete = BigDecimal.ZERO;
+	
 	private String cepDestino;
+	
 	private Pagamento pagamento;
 
 	@Autowired
-	ClienteRest clienteRest;
+	private ClienteRest clienteRest;
 
 	@Autowired
-	EnviadorMensagemJms enviador;
-
+	private EnviadorMensagemJms enviador;
 
 	public void adicionarOuIncremantarQuantidadeDoItem(Livro livro, Formato formato) {
 
@@ -203,5 +206,19 @@ public class Carrinho implements Serializable {
 		return codigos;
 	}
 
+	public void verificaDisponibilidadeNoEstoque() {
+		EstoqueService service = new EstoqueService();
+		Estoque estoque = service.getEstoque();
+
+		for (ItemCompra item : itensDeCompra) {
+			if (item.isImpresso()) {
+				ItemEstoque itemEstoque = estoque.getItemEstoque(item.getCodigo());
+
+				System.out.println("Disponibilidade do item: " + itemEstoque);
+
+				item.setQuantidadeNoEstoque(itemEstoque.getQuantidade());
+			}
+		}
+	}
 	
 }
