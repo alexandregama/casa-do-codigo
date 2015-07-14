@@ -1,11 +1,12 @@
-package br.com.caelum.livraria.modelo;
+package br.com.caelum.livraria.infra;
 
 import java.rmi.RemoteException;
 
+import br.com.caelum.livraria.modelo.Estoque;
+import br.com.caelum.livraria.modelo.ItemEstoque;
 import br.com.casadocodigo.rmi.EstoqueRmi;
-import br.com.casadocodigo.rmi.ItemEstoque;
 
-public class RmiEstoque implements Estoque {
+class RmiEstoque implements Estoque {
 
 	private EstoqueRmi estoqueRmi;
 

@@ -6,13 +6,14 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import br.com.caelum.livraria.modelo.Estoque;
-import br.com.caelum.livraria.modelo.RmiEstoque;
 import br.com.casadocodigo.rmi.EstoqueRmi;
 
 public class EstoqueService {
 
+	private static final String RMI_ESTOQUE_URL = "rmi://localhost:1099/estoque";
+
 	public Estoque getEstoque() {
-		String url = "rmi://localhost:1099/estoque";
+		String url = RMI_ESTOQUE_URL;
 		try {
 			EstoqueRmi estoque = (EstoqueRmi) Naming.lookup(url);
 			return new RmiEstoque(estoque);

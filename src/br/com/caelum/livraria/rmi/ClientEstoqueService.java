@@ -5,8 +5,8 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import br.com.caelum.livraria.modelo.ItemEstoque;
 import br.com.casadocodigo.rmi.EstoqueRmi;
-import br.com.casadocodigo.rmi.ItemEstoque;
 
 public class ClientEstoqueService {
 

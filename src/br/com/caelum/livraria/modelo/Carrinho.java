@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import br.com.caelum.livraria.infra.EstoqueService;
 import br.com.caelum.livraria.jms.EnviadorMensagemJms;
 import br.com.caelum.livraria.rest.ClienteRest;
-import br.com.casadocodigo.rmi.ItemEstoque;
 
 @Component
 @Scope("session")

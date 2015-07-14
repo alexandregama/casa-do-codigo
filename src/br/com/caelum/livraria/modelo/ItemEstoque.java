@@ -1,4 +1,4 @@
-package br.com.casadocodigo.rmi;
+package br.com.caelum.livraria.modelo;
 
 import java.io.Serializable;
 
