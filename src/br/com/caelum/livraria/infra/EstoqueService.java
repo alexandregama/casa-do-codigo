@@ -10,10 +10,8 @@ import br.com.casadocodigo.rmi.EstoqueRmi;
 
 public class EstoqueService {
 
-	private static final String RMI_ESTOQUE_URL = "rmi://localhost:1099/estoque";
-
 	public Estoque getEstoque() {
-		String url = RMI_ESTOQUE_URL;
+		String url = UriIntegration.RMI_ESTOQUE_URL;
 		try {
 			EstoqueRmi estoque = (EstoqueRmi) Naming.lookup(url);
 			return new RmiEstoque(estoque);
