@@ -118,9 +118,9 @@ public class CarrinhoController {
 	}
 	
 	@RequestMapping("/listar")
-	public String listar() throws Exception {
+	public String listar() {
 		
-		//verificacao do estoque aqui
+		carrinho.verificaDisponibilidadeNoEstoque();
 		
 		return CarrinhoRedirectUrl.JSP_CARRINHO_LISTAR;
 	}

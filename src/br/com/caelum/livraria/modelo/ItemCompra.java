@@ -15,8 +15,11 @@ public class ItemCompra implements Serializable {
 
 	@Id @GeneratedValue
 	private Integer id;
+	
 	private Formato formato;
+	
 	private Integer quantidade;
+	
 	private Integer quantidadeEstoque;
 	
 	@ManyToOne

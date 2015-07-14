@@ -2,6 +2,10 @@ package br.com.caelum.livraria.modelo;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
@@ -14,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import br.com.caelum.livraria.jms.EnviadorMensagemJms;
 import br.com.caelum.livraria.rest.ClienteRest;
+import br.com.casadocodigo.rmi.EstoqueRmi;
+import br.com.casadocodigo.rmi.ItemEstoque;
 
 @Component
 @Scope("session")
@@ -22,8 +28,11 @@ public class Carrinho implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Set<ItemCompra> itensDeCompra = new LinkedHashSet<>();
+	
 	private BigDecimal valorFrete = BigDecimal.ZERO;
+	
 	private String cepDestino;
+	
 	private Pagamento pagamento;
 
 	@Autowired
@@ -201,6 +210,30 @@ public class Carrinho implements Serializable {
 				codigos.add(item.getCodigo());
 		}
 		return codigos;
+	}
+
+	public void verificaDisponibilidadeNoEstoque() {
+		String url = "rmi://localhost:1099/estoque";
+		try {
+			EstoqueRmi estoque = (EstoqueRmi) Naming.lookup(url);
+			
+			for(ItemCompra item: itensDeCompra) {
+				if (item.isImpresso()) {
+					ItemEstoque itemEstoque = estoque.getItemEstoque(item.getCodigo());
+					
+//					System.out.println("Disponibilidade do item: " + itemEstoque);
+//					
+//					item.setQuantidadeNoEstoque(itemEstoque.getQuantidade());
+				}
+			}
+			
+		} catch (MalformedURLException e) {
+			throw new RuntimeException("Ocorreu um erro com a formacao da seguinte url para a chamada RMI: " + url, e);
+		} catch (RemoteException e) {
+			throw new RuntimeException("Ocorreu um erro com a chamada RMI ao Serviço de Estoque", e);
+		} catch (NotBoundException e) {
+			throw new RuntimeException("Ocorreu um erro ao chamar o Serviço de Estoque com a url: " + url, e);
+		}		
 	}
 
 	
