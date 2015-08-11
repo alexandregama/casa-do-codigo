@@ -120,7 +120,7 @@ public class CarrinhoController {
 	@RequestMapping("/listar")
 	public String listar() {
 		
-		carrinho.verificaDisponibilidadeNoEstoque();
+		carrinho.verificarDisponibilidadeNoEstoqueComSOAP();
 		
 		return CarrinhoRedirectUrl.JSP_CARRINHO_LISTAR;
 	}

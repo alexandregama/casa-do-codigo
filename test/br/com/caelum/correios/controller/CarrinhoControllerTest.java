@@ -1,13 +1,13 @@
 package br.com.caelum.correios.controller;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -33,19 +33,15 @@ public class CarrinhoControllerTest {
 	
 	@Mock
 	private Pedidos pedidos;
-
-	private CarrinhoController controller;
 	
 	private Livro livroQualquer = new LivroBuilder().build();
 	
 	@Mock
 	private RedirectAttributes redirect;
-
-	@Before
-	public void setUp() {
-		controller = new CarrinhoController(carrinho, livros, pedidos);
-	}
 	
+	@InjectMocks
+	private CarrinhoController controller;
+
 	@Test
 	public void deveriaAdicionarUmLivroNoCarrinhoQuandoOLivroExiste() throws Exception {
 		Livro livro = new LivroBuilder().build();
