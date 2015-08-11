@@ -12,9 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import br.com.caelum.estoque.soap.BuscaItensEstoque;
+import br.com.caelum.estoque.soap.BuscaItensEstoqueResponse;
+import br.com.caelum.estoque.soap.EstoqueWS;
+import br.com.caelum.estoque.soap.EstoqueWSService;
+import br.com.caelum.livraria.converter.ItemEstoqueWebServiceToItemEstoqueConverter;
 import br.com.caelum.livraria.infra.EstoqueService;
 import br.com.caelum.livraria.jms.EnviadorMensagemJms;
 import br.com.caelum.livraria.rest.ClienteRest;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
 @Component
 @Scope("session")
@@ -35,6 +43,9 @@ public class Carrinho implements Serializable {
 
 	@Autowired
 	private EnviadorMensagemJms enviador;
+	
+	@Autowired
+	private ItemEstoqueWebServiceToItemEstoqueConverter itemEstoqueConverter;
 
 	public void adicionarOuIncremantarQuantidadeDoItem(Livro livro, Formato formato) {
 
@@ -154,17 +165,17 @@ public class Carrinho implements Serializable {
 		return false;
 	}
 
-//	private void atualizarQuantidadeDisponivelDoItemCompra(final ItemEstoque itemEstoque) {
-//		ItemCompra item = Iterables.find(this.itensDeCompra, new Predicate<ItemCompra>() {
-//
-//			@Override
-//			public boolean apply(ItemCompra item) {
-//				return item.temCodigo(itemEstoque.getCodigo());
-//			}
-//		});
-//
-//		item.setQuantidadeNoEstoque(itemEstoque.getQuantidade());
-//	}
+	private void atualizarQuantidadeDisponivelDoItemCompra(final ItemEstoque itemEstoque) {
+		ItemCompra item = Iterables.find(this.itensDeCompra, new Predicate<ItemCompra>() {
+
+			@Override
+			public boolean apply(ItemCompra item) {
+				return item.temCodigo(itemEstoque.getCodigo());
+			}
+		});
+
+		item.setQuantidadeNoEstoque(itemEstoque.getQuantidade());
+	}
 
 	private void limparCarrinho() {
 		this.itensDeCompra = new LinkedHashSet<>();
@@ -195,18 +206,7 @@ public class Carrinho implements Serializable {
 		return null;
 	}
 
-	@SuppressWarnings("unused")
-	private List<String> getCodigosDosItensImpressos() {
-		List<String> codigos = new ArrayList<>();
-
-		for (ItemCompra item : this.itensDeCompra) {
-			if (item.isImpresso())
-				codigos.add(item.getCodigo());
-		}
-		return codigos;
-	}
-
-	public void verificaDisponibilidadeNoEstoque() {
+	public void verificaDisponibilidadeNoEstoqueComRMI() {
 		EstoqueService service = new EstoqueService();
 		Estoque estoque = service.getEstoque();
 
@@ -221,4 +221,30 @@ public class Carrinho implements Serializable {
 		}
 	}
 	
+	public void verificarDisponibilidadeNoEstoqueComSOAP() {
+		EstoqueWS estoqueWS = new EstoqueWSService().getEstoqueWSPort();
+		List<String> codigos = this.getCodigosDosItensImpressos();
+		
+		BuscaItensEstoque itensPeloCodigo = new BuscaItensEstoque();
+		itensPeloCodigo.getCodigos().addAll(codigos);
+		
+		BuscaItensEstoqueResponse response = estoqueWS.buscaItensEstoque(itensPeloCodigo, "TOKEN123");
+		
+		List<br.com.caelum.estoque.soap.ItemEstoque> itensWebService = response.getItensEstoque();
+		List<ItemEstoque> itens = itemEstoqueConverter.convert(itensWebService);
+		
+		for (ItemEstoque item : itens) {
+			this.atualizarQuantidadeDisponivelDoItemCompra(item);
+		}
+	}
+
+	private List<String> getCodigosDosItensImpressos() {
+		List<String> codigos = new ArrayList<>();
+
+		for (ItemCompra item : this.itensDeCompra) {
+			if (item.isImpresso())
+				codigos.add(item.getCodigo());
+		}
+		return codigos;
+	}
 }
