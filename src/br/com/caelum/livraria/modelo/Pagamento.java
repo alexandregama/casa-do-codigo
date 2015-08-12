@@ -6,6 +6,9 @@ import java.util.ArrayList;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.xml.bind.annotation.XmlElement;
+
+import com.google.common.base.Objects;
 
 @Entity
 public class Pagamento implements Serializable {
@@ -17,6 +20,7 @@ public class Pagamento implements Serializable {
 	
 	@Id 
 	private Integer id;
+	@XmlElement(name = "estadoAtual")
 	private String status;
 	private BigDecimal valor;
 	
@@ -73,8 +77,7 @@ public class Pagamento implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Pagamento [id=" + this.id + ", status=" + this.status + ", valor=" + this.valor + ", links="
-				+ this.links + "]";
+		return Objects.toStringHelper(this).add("id", id).add("valor", valor).add("links", links).toString();
 	}
 
 }

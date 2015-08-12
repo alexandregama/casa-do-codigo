@@ -99,6 +99,7 @@ public class Carrinho implements Serializable {
 		pedido.setItens(new LinkedHashSet<>(this.itensDeCompra));
 
 		this.pagamento = this.clienteRest.confirmarPagamento(pagamento);
+		
 		pedido.setPagamento(pagamento);
 		this.enviador.enviar(pedido);
 
@@ -110,6 +111,7 @@ public class Carrinho implements Serializable {
 	public void atualizarFrete(final String novoCepDestino) {
 		this.cepDestino = novoCepDestino;
 
+		this.valorFrete = new BigDecimal("25");
 		//servico web do correios aqui
 	}
 
@@ -222,19 +224,22 @@ public class Carrinho implements Serializable {
 	}
 	
 	public void verificarDisponibilidadeNoEstoqueComSOAP() {
-		EstoqueWS estoqueWS = new EstoqueWSService().getEstoqueWSPort();
 		List<String> codigos = this.getCodigosDosItensImpressos();
 		
-		BuscaItensEstoque itensPeloCodigo = new BuscaItensEstoque();
-		itensPeloCodigo.getCodigos().addAll(codigos);
-		
-		BuscaItensEstoqueResponse response = estoqueWS.buscaItensEstoque(itensPeloCodigo, "TOKEN123");
-		
-		List<br.com.caelum.estoque.soap.ItemEstoque> itensWebService = response.getItensEstoque();
-		List<ItemEstoque> itens = itemEstoqueConverter.convert(itensWebService);
-		
-		for (ItemEstoque item : itens) {
-			this.atualizarQuantidadeDisponivelDoItemCompra(item);
+		if (codigos != null && !codigos.isEmpty()) {
+			EstoqueWS estoqueWS = new EstoqueWSService().getEstoqueWSPort();
+			
+			BuscaItensEstoque itensPeloCodigo = new BuscaItensEstoque();
+			itensPeloCodigo.getCodigos().addAll(codigos);
+			
+			BuscaItensEstoqueResponse response = estoqueWS.buscaItensEstoque(itensPeloCodigo, "TOKEN123");
+			
+			List<br.com.caelum.estoque.soap.ItemEstoque> itensWebService = response.getItensEstoque();
+			List<ItemEstoque> itens = itemEstoqueConverter.convert(itensWebService);
+			
+			for (ItemEstoque item : itens) {
+				this.atualizarQuantidadeDisponivelDoItemCompra(item);
+			}
 		}
 	}
 
