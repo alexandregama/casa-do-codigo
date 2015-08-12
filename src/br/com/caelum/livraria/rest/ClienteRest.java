@@ -12,7 +12,7 @@ public class ClienteRest implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	private static final String SERVER_URI = "http://localhost:8080/fj36-webservice";
+	private static final String SERVER_URI = "http://localhost:8080/casa-do-codigo-webservice";
 	private static final String ENTRY_POINT = "/pagamentos/";
 
 	public Pagamento criarPagamento(Transacao transacao) {
