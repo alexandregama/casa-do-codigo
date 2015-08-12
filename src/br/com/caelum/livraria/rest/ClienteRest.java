@@ -8,6 +8,7 @@ import javax.ws.rs.client.Entity;
 
 import org.springframework.stereotype.Component;
 
+import br.com.caelum.livraria.modelo.Link;
 import br.com.caelum.livraria.modelo.Pagamento;
 import br.com.caelum.livraria.modelo.Transacao;
 
@@ -33,7 +34,18 @@ public class ClienteRest implements Serializable {
 	}
 
 	public Pagamento confirmarPagamento(Pagamento pagamento) {
-		return null;
+		Client client = ClientBuilder.newClient();
+		Link link = pagamento.getLinkPeloRel("confirmar");
+		
+		Pagamento pagamentoConfirmado = client
+			.target(SERVER_URI + link.getUri())
+			.request()
+			.build(link.getMethod())
+			.invoke(Pagamento.class);
+		
+		System.out.println("Pagamento confirmado: " + pagamentoConfirmado);
+		
+		return pagamentoConfirmado;
 	}
 
 }
