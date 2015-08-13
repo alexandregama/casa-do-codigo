@@ -42,7 +42,7 @@ public class Carrinho implements Serializable {
 	private ClienteRest clienteRest;
 
 	@Autowired
-	private EnviadorMensagemJms enviador;
+	private EnviadorMensagemJms enviadorParaFila;
 	
 	@Autowired
 	private ItemEstoqueWebServiceToItemEstoqueConverter itemEstoqueConverter;
@@ -101,7 +101,7 @@ public class Carrinho implements Serializable {
 		this.pagamento = this.clienteRest.confirmarPagamento(pagamento);
 		
 		pedido.setPagamento(pagamento);
-		this.enviador.enviar(pedido);
+		this.enviadorParaFila.enviar(pedido);
 
 		this.limparCarrinho();
 

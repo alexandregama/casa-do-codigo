@@ -32,7 +32,8 @@ public class EnviadorMensagemJms implements Serializable {
 			
 			producer.setProperty("format", pedido.getFormato());
 			
-			producer.send(topico, pedido.toString());
+			producer.send(topico, pedido.toXml());
 		}
 	}
+	
 }
