@@ -17,9 +17,14 @@ import javax.persistence.TemporalType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.common.base.Objects;
 
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement
 @Entity
 public class Pedido implements Serializable {
 
