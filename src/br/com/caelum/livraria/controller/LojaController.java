@@ -5,10 +5,16 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 
 import br.com.caelum.livraria.modelo.Livro;
 
@@ -33,4 +39,14 @@ public class LojaController {
 		return "loja/index";
 	}
 
+	@ResponseBody
+	@RequestMapping(value = "/livros/mais-vendidos", method = RequestMethod.GET, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public String livrosMaisVendidos() {
+		List<Livro> livros = entityManager.createQuery("select l from Livro l", Livro.class).getResultList();
+		XStream xstream = new XStream(new JettisonMappedXmlDriver());
+		
+		String json = xstream.toXML(livros);
+		return json;
+	}
 }
