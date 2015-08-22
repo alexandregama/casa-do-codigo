@@ -61,4 +61,15 @@ public class LojaController {
 		return livrosJson;
 	}
 	
+	@ResponseBody
+	@RequestMapping(value = "/livros/mais-baratos", method = RequestMethod.GET,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public String livrosBaisBaratos() {
+		List<Livro> livros = entityManager.createQuery("select l from Livro l", Livro.class).getResultList();
+		
+		XStream xstream = new XStream(new JettisonMappedXmlDriver());
+		String livrosJson = xstream.toXML(livros);
+		return livrosJson;
+	}
+	
 }
